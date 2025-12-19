@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>IOT CONTROL SYSTEM</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="page">
+    <!-- 顶部栏 -->
+    <header class="topbar">
+      <div class="logo">IOT CONTROL SYSTEM</div>
+      <div class="title">CABIN-01 | SUN-LAMP</div>
+      <div class="status">
+        <span class="pill" id="pill-online">OFFLINE</span>
+        <span class="pill warn" id="pill-alert">NORMAL</span>
+        <span class="clock" id="clock"></span>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- 环境监控 -->
+      <section class="panel span2">
+        <div class="panel-head">ENVIRONMENT STATUS</div>
+        <div class="env-grid">
+          <div class="card" id="card-temp">
+            <div class="card-title">TEMPERATURE</div>
+            <div class="metric"><span id="temp">-</span><small>°C</small></div>
+            <div class="bar">
+              <div class="fill" id="bar-temp"></div>
+            </div>
+            <div class="tag" id="tag-temp">NORMAL</div>
+          </div>
+          <div class="card" id="card-humid">
+            <div class="card-title">HUMIDITY</div>
+            <div class="metric"><span id="humid">-</span><small>%</small></div>
+            <div class="bar">
+              <div class="fill" id="bar-humid"></div>
+            </div>
+            <div class="tag" id="tag-humid">NORMAL</div>
+          </div>
+          <div class="card" id="card-eco2">
+            <div class="card-title">CO₂</div>
+            <div class="metric"><span id="eco2">-</span><small>ppm</small></div>
+            <div class="bar">
+              <div class="fill" id="bar-eco2"></div>
+            </div>
+            <div class="tag" id="tag-eco2">NORMAL</div>
+          </div>
+          <div class="card" id="card-tvoc">
+            <div class="card-title">TVOC</div>
+            <div class="metric"><span id="tvoc">-</span><small>ppb</small></div>
+            <div class="bar">
+              <div class="fill" id="bar-tvoc"></div>
+            </div>
+            <div class="tag" id="tag-tvoc">NORMAL</div>
+          </div>
+          <div class="card" id="card-light">
+            <div class="card-title">LIGHT</div>
+            <div class="metric"><span id="light">-</span><small>lux</small></div>
+            <div class="bar">
+              <div class="fill" id="bar-light"></div>
+            </div>
+            <div class="tag" id="tag-light">NORMAL</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 灯具控制 -->
+      <section class="panel">
+        <div class="panel-head">SUN-LAMP CONTROL</div>
+        <div class="lamp">
+          <div class="preview">
+            <div class="ring"></div>
+            <div class="pixels" id="pixels"></div>
+          </div>
+          <div class="controls">
+            <div class="row">
+              <label>POWER</label>
+              <label class="switch">
+                <input type="checkbox" id="is_on" />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="row">
+              <label>BRIGHTNESS</label>
+              <input type="range" id="brightness" min="0" max="100" step="1" />
+              <span id="brightness-val">0</span>%
+            </div>
+            <div class="row">
+              <label>CCT</label>
+              <div class="btn-group">
+                <button data-ct="5000">5000K</button>
+                <button data-ct="4000">4000K</button>
+                <button data-ct="3000">3000K</button>
+              </div>
+            </div>
+            <div class="row">
+              <label>NIGHT</label>
+              <button id="night" class="accent">琥珀夜灯</button>
+            </div>
+            <div class="row">
+              <label>RGB</label>
+              <input type="color" id="color" value="#ff7828" />
+              <button id="send-rgb">应用</button>
+            </div>
+            <div class="row">
+              <label>ANIM</label>
+              <select id="anim-type">
+                <option value="wakeup">wakeup</option>
+                <option value="warning">warning</option>
+              </select>
+              <input type="number" id="anim-duration" min="10" max="3600" value="600" />
+              <button id="send-anim">发送</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 系统/阈值 -->
+      <section class="panel span2">
+        <div class="panel-head">SYSTEM STATUS / THRESHOLD</div>
+        <div class="sys-grid">
+          <div class="sys">
+            <div>WiFi: <span id="wifi">-</span></div>
+            <div>MQTT: <span id="mqtt">-</span></div>
+            <div>灯: <span id="lamp">-</span></div>
+            <div>固件: <span id="fw">MicroPython</span></div>
+            <div>最后同步: <span id="last-ts">-</span></div>
+            <button id="refresh">刷新状态</button>
+          </div>
+          <div class="thresh">
+            <div class="row"><label>温度(°C)</label><input type="number" id="th-temp" placeholder="如 30">
+            </div>
+            <div class="row"><label>湿度(%)</label><input type="number" id="th-humid" placeholder="如 80">
+            </div>
+            <div class="row"><label>eCO2(ppm)</label><input type="number" id="th-eco2" placeholder="如 1000">
+            </div>
+            <div class="row"><label>TVOC</label><input type="number" id="th-tvoc" placeholder="如 400"></div>
+            <div class="row"><label>光照</label><input type="number" id="th-light" placeholder="如 5000"></div>
+            <div class="row between">
+              <button id="save-th">保存阈值</button>
+              <span id="alert-flag" class="badge off">正常</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- IIFE uibuilder -->
+  <script src="/uibuilder/uibuilder.iife.min.js"></script>
+  <script src="./index.js"></script>
+</body>
+
+</html>

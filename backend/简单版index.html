@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>ESP32 Sunlamp</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <main class="wrap">
+    <section class="card">
+      <header>状态</header>
+      <div class="state">
+        <div>WiFi: <span id="wifi">-</span></div>
+        <div>MQTT: <span id="mqtt">-</span></div>
+        <div>温湿度: <span id="th">-</span></div>
+        <div>气体: <span id="gas">-</span></div>
+        <div>光照: <span id="lux">-</span></div>
+        <div>灯: <span id="lamp">-</span></div>
+      </div>
+      <button id="refresh">刷新状态</button>
+    </section>
+
+    <section class="card">
+      <header>基础控制</header>
+      <div class="row">
+        <label>电源</label>
+        <label class="switch">
+          <input type="checkbox" id="is_on" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="row">
+        <label for="brightness">亮度</label>
+        <input type="range" id="brightness" min="0" max="100" step="1" />
+        <span id="brightness-val">0</span>%
+      </div>
+      <div class="row">
+        <label>色温</label>
+        <div class="btn-group">
+          <button data-ct="5000">5000K</button>
+          <button data-ct="4000">4000K</button>
+          <button data-ct="3000">3000K</button>
+        </div>
+      </div>
+      <div class="row">
+        <label>夜灯</label>
+        <button id="night">琥珀夜灯</button>
+      </div>
+      <div class="row">
+        <label for="color">RGB</label>
+        <input type="color" id="color" value="#ff7828" />
+        <button id="send-rgb">应用颜色</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <header>动画</header>
+      <div class="row">
+        <label for="anim-type">类型</label>
+        <select id="anim-type">
+          <option value="wakeup">wakeup（日出）</option>
+          <option value="warning">warning（警示闪）</option>
+          <option value="sunset">sunset（日落）</option>
+          <option value="breathe">breathe（呼吸灯）</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="anim-duration">时长(s)</label>
+        <input type="number" id="anim-duration" min="10" max="3600" value="600" />
+      </div>
+      <div class="row">
+        <div class="btn-group">
+          <button id="quick-wakeup">日出</button>
+          <button id="quick-sunset">日落</button>
+          <button id="quick-breathe">呼吸</button>
+          <button id="quick-warning">警示</button>
+        </div>
+      </div>
+      <button id="send-anim">发送动画</button>
+    </section>
+
+    <section class="card">
+      <header>警戒阈值</header>
+      <div class="row"><label>温度(°C)</label><input type="number" id="th-temp" placeholder="如 30"></div>
+      <div class="row"><label>湿度(%)</label><input type="number" id="th-humid" placeholder="如 80"></div>
+      <div class="row"><label>eCO2(ppm)</label><input type="number" id="th-eco2" placeholder="如 1000"></div>
+      <div class="row"><label>TVOC</label><input type="number" id="th-tvoc" placeholder="如 400"></div>
+      <div class="row"><label>光照</label><input type="number" id="th-light" placeholder="如 5000"></div>
+      <div class="row">
+        <button id="save-th">保存阈值</button>
+        <span id="alert-flag" class="badge off">正常</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <header>起床闹钟</header>
+      <div class="row">
+        <label>时间</label>
+        <input type="time" id="alarm-time" value="07:00">
+      </div>
+      <div class="row">
+        <label>时长(s)</label>
+        <input type="number" id="alarm-duration" min="60" max="3600" value="600">
+      </div>
+      <div class="row">
+        <button id="alarm-save">保存并启动</button>
+        <button id="alarm-cancel">取消</button>
+      </div>
+      <div class="row">
+        <span id="alarm-status" style="color:var(--muted)">未设置</span>
+      </div>
+    </section>
+
+
+  </main>
+
+  <script src="/uibuilder/uibuilder.iife.min.js"></script>
+  <script src="./index.js"></script>
+</body>
+
+</html>

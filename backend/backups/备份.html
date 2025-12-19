@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sunlamp Control</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="../uibuilder/uibuilder.iife.min.js"></script>
+  <script src="index.js" defer></script>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Sunlamp Control</h1>
+    <div class="control-group">
+      <label for="power-switch">Power</label>
+      <label class="switch">
+        <input type="checkbox" id="power-switch">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="control-group">
+      <label for="brightness-slider">Brightness</label>
+      <input type="range" id="brightness-slider" min="0" max="100" step="5" value="50">
+      <span id="brightness-value">50</span>%
+    </div>
+    <div class="control-group">
+      <label for="color-select">Color Mode</label>
+      <select id="color-select">
+        <option value="white">White</option>
+        <option value="yellow">Yellow</option>
+        <option value="red">Red</option>
+      </select>
+    </div>
+    <div class="control-group buttons">
+      <button id="btn-wakeup">Start Wakeup</button>
+      <button id="btn-warning">Trigger Warning</button>
+    </div>
+  </div>
+</body>
+
+</html>
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>ESP32 Sunlamp</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <main class="wrap">
+    <section class="card">
+      <header>状态</header>
+      <div class="state">
+        <div>WiFi: <span id="wifi">-</span></div>
+        <div>MQTT: <span id="mqtt">-</span></div>
+        <div>温湿度: <span id="th">-</span></div>
+        <div>气体: <span id="gas">-</span></div>
+        <div>光照: <span id="lux">-</span></div>
+        <div>灯: <span id="lamp">-</span></div>
+      </div>
+      <button id="refresh">刷新状态</button>
+    </section>
+
+    <section class="card">
+      <header>基础控制</header>
+      <div class="row">
+        <label>电源</label>
+        <label class="switch">
+          <input type="checkbox" id="is_on" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="row">
+        <label for="brightness">亮度</label>
+        <input type="range" id="brightness" min="0" max="100" step="1" />
+        <span id="brightness-val">0</span>%
+      </div>
+      <div class="row">
+        <label>色温</label>
+        <div class="btn-group">
+          <button data-ct="5000">5000K</button>
+          <button data-ct="4000">4000K</button>
+          <button data-ct="3000">3000K</button>
+        </div>
+      </div>
+      <div class="row">
+        <label>夜灯</label>
+        <button id="night">琥珀夜灯</button>
+      </div>
+      <div class="row">
+        <label for="color">RGB</label>
+        <input type="color" id="color" value="#ff7828" />
+        <button id="send-rgb">应用颜色</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <header>动画</header>
+      <div class="row">
+        <label for="anim-type">类型</label>
+        <select id="anim-type">
+          <option value="wakeup">wakeup（日出）</option>
+          <option value="warning">warning（警示闪）</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="anim-duration">时长(s)</label>
+        <input type="number" id="anim-duration" min="10" max="3600" value="600" />
+      </div>
+      <button id="send-anim">发送动画</button>
+    </section>
+
+    <section class="card">
+      <header>警戒阈值</header>
+      <div class="row"><label>温度(°C)</label><input type="number" id="th-temp" placeholder="如 30"></div>
+      <div class="row"><label>湿度(%)</label><input type="number" id="th-humid" placeholder="如 80"></div>
+      <div class="row"><label>eCO2(ppm)</label><input type="number" id="th-eco2" placeholder="如 1000"></div>
+      <div class="row"><label>TVOC</label><input type="number" id="th-tvoc" placeholder="如 400"></div>
+      <div class="row"><label>光照</label><input type="number" id="th-light" placeholder="如 5000"></div>
+      <div class="row">
+        <button id="save-th">保存阈值</button>
+        <span id="alert-flag" class="badge off">正常</span>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/uibuilder/uibuilder.iife.min.js"></script>
+  <script src="./index.js"></script>
+</body>
+
+</html>

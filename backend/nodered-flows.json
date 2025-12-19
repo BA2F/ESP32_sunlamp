@@ -1,0 +1,295 @@
+[
+  {
+    "id": "ad351bc4b9ad09f8",
+    "type": "mqtt in",
+    "z": "a1fa193f6dd0cf8a",
+    "name": "esp32/sunlamp/status",
+    "topic": "esp32/sunlamp/status",
+    "qos": "0",
+    "datatype": "json",
+    "broker": "mqtt_broker_config",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 200,
+    "y": 180,
+    "wires": [
+      [
+        "70e2f76e68038f82",
+        "e61e180e382e2076",
+        "d72f60b342fb2de4"
+      ]
+    ]
+  },
+  {
+    "id": "445ff00ad36894cf",
+    "type": "influxdb out",
+    "z": "a1fa193f6dd0cf8a",
+    "influxdb": "6cda38b21038c7e0",
+    "name": "",
+    "measurement": "sensor_readings",
+    "precision": "",
+    "retentionPolicy": "",
+    "database": "database",
+    "precisionV18FluxV20": "ms",
+    "retentionPolicyV18Flux": "",
+    "org": "iot_org",
+    "bucket": "sensor_data",
+    "x": 850,
+    "y": 180,
+    "wires": []
+  },
+  {
+    "id": "70e2f76e68038f82",
+    "type": "debug",
+    "z": "a1fa193f6dd0cf8a",
+    "name": "debug 1",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 460,
+    "y": 120,
+    "wires": []
+  },
+  {
+    "id": "e61e180e382e2076",
+    "type": "function",
+    "z": "a1fa193f6dd0cf8a",
+    "name": "Flattening JSON",
+    "func": "// // 从原始消息中获取数据\n// const data = msg.payload;\n\n// // 创建一个新的、符合要求的数据对象\n// const newPayload = {\n//     temp: data.dht22.temperature,\n//     humid: data.dht22.humidity,\n//     voc: data.sgp30.tvoc,\n//     co2: data.sgp30.eco2,\n//     light: data.light\n// };\n\n// // 用新对象替换掉原来的 msg.payload\n// msg.payload = newPayload;\n\n// // 必须返回消息，才能传递给下一个节点\n\n// return msg;\n\n// 输入的 msg.payload 就是完整的 system_state 对象\nconst systemState = msg.payload;\n\n// 检查输入数据是否有效，防止因数据格式错误导致流程中断\nif (!systemState || !systemState.sensor) {\n    node.error(\"Invalid payload: 'systemState.sensor' is missing.\", msg);\n    return null; // 停止消息传递\n}\n\n// 从 systemState.sensor 对象中提取数据，并创建一个新的扁平化对象\nconst newPayload = {\n    temp: systemState.sensor.temperature,\n    humid: systemState.sensor.humidity,\n    voc: systemState.sensor.tvoc,\n    co2: systemState.sensor.eco2,\n    light: systemState.sensor.light\n};\n\n// 用新对象替换掉原来的 msg.payload\nmsg.payload = newPayload;\n\n// 必须返回消息，才能传递给下一个节点\nreturn msg;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 540,
+    "y": 220,
+    "wires": [
+      [
+        "445ff00ad36894cf"
+      ]
+    ]
+  },
+  {
+    "id": "a7bb6936d015346e",
+    "type": "switch",
+    "z": "a1fa193f6dd0cf8a",
+    "name": "",
+    "property": "topic",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "eq",
+        "v": "set",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "anim",
+        "vt": "str"
+      },
+      {
+        "t": "else"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 3,
+    "x": 730,
+    "y": 420,
+    "wires": [
+      [
+        "455edbc2c4a32585"
+      ],
+      [
+        "e6a851846d1e01b8"
+      ],
+      [
+        "f1d40199c3b536b7"
+      ]
+    ]
+  },
+  {
+    "id": "455edbc2c4a32585",
+    "type": "function",
+    "z": "a1fa193f6dd0cf8a",
+    "name": "set",
+    "func": "const p = msg.payload || {};\nconst out = { cmd: 'set' };\n\nif (p.hasOwnProperty('is_on')) out.is_on = !!p.is_on;\n\nif (p.hasOwnProperty('brightness')) {\n    const b = parseInt(p.brightness, 10);\n    out.brightness = Math.max(0, Math.min(100, isNaN(b) ? 0 : b));\n}\n\nif (p.hasOwnProperty('color_temp_k')) {\n    const k = parseInt(p.color_temp_k, 10);\n    if (!isNaN(k)) { out.color_temp_k = k; out.color_mode = 'temp'; }\n}\n\nif (typeof p.color_hex === 'string') {\n    out.color_hex = p.color_hex;\n    out.color_mode = 'custom';\n} else if (Array.isArray(p.rgb) && p.rgb.length === 3) {\n    out.rgb = p.rgb.map(x => Math.max(0, Math.min(255, parseInt(x, 10) || 0)));\n    out.color_mode = 'custom';\n}\n\nmsg.payload = JSON.stringify(out);\nreturn msg;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 910,
+    "y": 340,
+    "wires": [
+      [
+        "5617539f3c51508c"
+      ]
+    ]
+  },
+  {
+    "id": "e6a851846d1e01b8",
+    "type": "function",
+    "z": "a1fa193f6dd0cf8a",
+    "name": "anim",
+    "func": "const p = msg.payload || {};\nconst out = { cmd: 'anim' };\nif (p.type) out.type = p.type;\nif (p.hasOwnProperty('duration_s')) {\n    const d = parseInt(p.duration_s, 10);\n    if (!isNaN(d)) out.duration_s = d;\n}\nmsg.payload = JSON.stringify(out);\nreturn msg;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 910,
+    "y": 420,
+    "wires": [
+      [
+        "5617539f3c51508c"
+      ]
+    ]
+  },
+  {
+    "id": "f1d40199c3b536b7",
+    "type": "debug",
+    "z": "a1fa193f6dd0cf8a",
+    "name": "debug 3",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 920,
+    "y": 500,
+    "wires": []
+  },
+  {
+    "id": "5617539f3c51508c",
+    "type": "mqtt out",
+    "z": "a1fa193f6dd0cf8a",
+    "name": "",
+    "topic": "esp32/sunlamp/cmd",
+    "qos": "",
+    "retain": "",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "mqtt_broker_config",
+    "x": 1180,
+    "y": 380,
+    "wires": []
+  },
+  {
+    "id": "d72f60b342fb2de4",
+    "type": "function",
+    "z": "a1fa193f6dd0cf8a",
+    "name": "function 1",
+    "func": "// // 如果前端要主动获取最新状态，可在前端发 topic='get_state'\n// if (msg.topic === 'get_state') {\n//     const last = flow.get('lastState');\n//     return last ? { topic: 'state', payload: last } : null;\n// }\n\n// const state = msg.payload;\n// if (!state || !state.sensor || !state.lamp) {\n//     node.warn('Invalid state payload');\n//     return null;\n// }\n// flow.set('lastState', state);            // 缓存\n// return { topic: 'state', payload: state }; // 发给 uibuilder\n// 允许没有 lamp 的状态，只要 sensor 存在就通过\nif (msg.topic === 'get_state') {\n    const last = flow.get('lastState');\n    return last ? { topic: 'state', payload: last } : null;\n}\nconst state = msg.payload;\nif (!state || !state.sensor) {\n    node.warn(\"Invalid payload: missing sensor\");\n    return null;\n}\nif (!state.lamp) state.lamp = {};   // 设备上报时 lamp 可能为空\nflow.set('lastState', state);\nreturn { topic: 'state', payload: state };\n\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 300,
+    "y": 340,
+    "wires": [
+      [
+        "91d9c38ec69ff164"
+      ]
+    ]
+  },
+  {
+    "id": "91d9c38ec69ff164",
+    "type": "uibuilder",
+    "z": "a1fa193f6dd0cf8a",
+    "name": "",
+    "topic": "",
+    "url": "sunlamp",
+    "okToGo": true,
+    "fwdInMessages": false,
+    "allowScripts": false,
+    "allowStyles": false,
+    "copyIndex": true,
+    "templateFolder": "blank",
+    "extTemplate": "",
+    "showfolder": false,
+    "reload": false,
+    "sourceFolder": "src",
+    "deployedVersion": "7.5.0",
+    "showMsgUib": false,
+    "title": "",
+    "descr": "",
+    "editurl": "vscode://vscode-remote/ssh-remote+8.138.213.43/data/uibuilder/sunlamp/?windowId=_blank",
+    "x": 530,
+    "y": 340,
+    "wires": [
+      [
+        "a7bb6936d015346e"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "mqtt_broker_config",
+    "type": "mqtt-broker",
+    "name": "EMQX Broker",
+    "broker": "emqx",
+    "port": "21883",
+    "clientid": "",
+    "autoConnect": true,
+    "usetls": false,
+    "protocolVersion": "4",
+    "keepalive": "60",
+    "cleansession": true,
+    "autoUnsubscribe": true,
+    "birthTopic": "",
+    "birthQos": "0",
+    "birthPayload": "",
+    "birthMsg": {},
+    "closeTopic": "",
+    "closeQos": "0",
+    "closePayload": "",
+    "closeMsg": {},
+    "willTopic": "",
+    "willQos": "0",
+    "willPayload": "",
+    "willMsg": {},
+    "userProps": "",
+    "sessionExpiry": ""
+  },
+  {
+    "id": "6cda38b21038c7e0",
+    "type": "influxdb",
+    "hostname": "influxdb",
+    "port": 8086,
+    "protocol": "http",
+    "database": "database",
+    "name": "influxdb",
+    "usetls": false,
+    "tls": "",
+    "influxdbVersion": "2.0",
+    "url": "http://influxdb:8086",
+    "timeout": 10,
+    "rejectUnauthorized": true
+  },
+  {
+    "id": "175ba863b2f45d90",
+    "type": "global-config",
+    "env": [],
+    "modules": {
+      "node-red-contrib-influxdb": "0.7.0",
+      "node-red-contrib-uibuilder": "7.5.0"
+    }
+  }
+]

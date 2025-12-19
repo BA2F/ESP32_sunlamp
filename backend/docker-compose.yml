@@ -1,0 +1,82 @@
+services:
+  emqx:
+    image: hub.rat.dev/emqx/emqx:5.8.8
+    container_name: emqx
+    restart: unless-stopped
+    ports:
+      - "21883:21883"  # MQTT
+      - "28083:28083"  # MQTT over SSL/WS
+      - "18083:18083"  # Management Dashboard
+    volumes:
+      - ./emqx/data:/opt/emqx/data
+      - ./emqx/log:/opt/emqx/log
+    environment:
+      - EMQX_HOST=emqx
+    networks:
+      - iot_net
+
+  influxdb:
+    image: hub.rat.dev/influxdb:2.7.12
+    container_name: influxdb
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    volumes:
+      - ./influxdb/data:/var/lib/influxdb2
+      - ./influxdb/config:/etc/influxdb2
+    environment:
+      # 初始化容器后，这些环境变量用于创建初始用户和组织
+      # 如果数据目录已存在，这些变量在重启时不会生效
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=123abc!@
+      - DOCKER_INFLUXDB_INIT_ORG=iot_org
+      - DOCKER_INFLUXDB_INIT_BUCKET=sensor_data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - iot_net
+
+  grafana:
+    image: hub.rat.dev/grafana/grafana:12.2.0
+    container_name: grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      # 将 grafana 的数据、配置、插件等持久化到宿主机
+      - ./grafana/data:/var/lib/grafana
+    # 如果您想自动配置数据源，可以创建 provisioning 目录
+    # - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SERVER_ROOT_URL=http://8.138.213.43:3000
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    networks:
+      - iot_net
+
+  nodered:
+    build:
+      context: ./nodered # 指定构建上下文目录
+    container_name: my-nodered
+    restart: unless-stopped
+    ports:
+      - "1880:1880"
+    volumes:
+      # 挂载 Node-RED 的用户数据目录
+      - ./nodered/nodered-data:/data
+    depends_on:
+      influxdb:
+        condition: service_healthy
+      emqx:
+        condition: service_started
+    networks:
+      - iot_net
+
+networks:
+  iot_net:
+    driver: bridge
