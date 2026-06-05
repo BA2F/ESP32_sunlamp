@@ -5,6 +5,14 @@
 >项目示例：[IoT 导航中心](http://8.138.213.43/) [^1]
 >[^1]: 2026年3月28日备注：示例预计2026年5月27日 00:00:00到期.
 
+![image](backend/入口.png)
+![image](backend/控制中心.png)
+![image](backend/EMQX后台.png)
+![image](backend/NodeRED后台.png)
+![image](backend/influxdb.png)
+![image](backend/Grafanan.png)
+![image](backend/服务器后台.png)
+
 目录：
 - 架构与数据流
 - 设备端说明（MicroPython）
